@@ -1,57 +1,74 @@
+const DEFAULT_GRID_SIZE = 16;
 const container = document.querySelector("div.container");
-const topContainer = document.createElement("div");
+const grid = document.querySelector("div.grid");
+const settingsContainer = document.createElement("div");
 const button = document.createElement("button");
 const sizeSlider = document.createElement("input");
+const sizeText = document.createElement("p");
 
-topContainer.className = "top-container";
-container.before(topContainer);
+settingsContainer.className = "settings-container";
+container.after(settingsContainer);
+
+function createSizeText(size = parseInt(sizeSlider.value)) {
+  sizeText.textContent = `${size} x ${size}`;
+  settingsContainer.prepend(sizeText);
+}
 
 function createSlider(min, max, step) {
-  const sizeText = document.createElement("p");
   sizeSlider.type = "range";
-  sizeSlider.value = 16;
+  sizeSlider.value = DEFAULT_GRID_SIZE;
   sizeSlider.min = min;
   sizeSlider.max = max;
   sizeSlider.step = step;
   sizeSlider.addEventListener("input", () => {
-    sizeText.textContent = sizeSlider.value;
+    createSizeText();
   });
   sizeSlider.addEventListener("mouseup", () => {
-    createGrid(parseInt(sizeSlider.value));
+    resetGrid();
   });
-  sizeText.textContent = sizeSlider.value;
-  topContainer.appendChild(sizeText);
-  topContainer.appendChild(sizeSlider);
+  settingsContainer.appendChild(sizeSlider);
+}
+
+function clearGridContent() {
+  grid.innerHTML = "";
+}
+
+function resetGrid() {
+  clearGridContent();
+  createGrid();
+}
+
+function createResetButton() {
+  button.textContent = "Reset";
+  button.onclick = () => {
+    resetGrid();
+  };
+  settingsContainer.appendChild(button);
 }
 
 function randomizeColor() {
   let r, g, b, a;
-  r = Math.floor(Math.random() * 255);
-  g = Math.floor(Math.random() * 255);
-  b = Math.floor(Math.random() * 255);
+  r = Math.floor(Math.random() * 256);
+  g = Math.floor(Math.random() * 256);
+  b = Math.floor(Math.random() * 256);
   a = Math.floor(Math.random() * 100);
   return `rgba(${r}, ${g}, ${b},${a})`;
 }
 
-function createGrid(size) {
-  container.innerHTML = "";
-  // container.
+function createGrid(size = parseInt(sizeSlider.value)) {
   // prettier-ignore
-  const total = (size * size) + size;
-  const modulo = size + 1;
-  for (let i = 1; i < total; i++) {
+  for (let i = 0; i < size * size; i++) {
     const div = document.createElement("div");
     div.addEventListener("mouseover", () => {
       div.style.backgroundColor = randomizeColor();
     });
-    if (i % modulo === 0) {
-      div.classList.add("plus-one");
-    }
-    container.appendChild(div);
+    grid.appendChild(div);
   }
-  container.style.gridTemplateColumns = `repeat(${modulo},2fr)`;
-  container.style.gridTemplateRows = `repeat(${modulo},2fr)`;
+  grid.style.gridTemplateColumns = `repeat(${size},2fr)`;
+  grid.style.gridTemplateRows = `repeat(${size},2fr)`;
 }
 
-createSlider(2, 64, 2);
-createGrid(parseInt(sizeSlider.value));
+createGrid(DEFAULT_GRID_SIZE);
+createSlider(2, 100, 2);
+createSizeText(DEFAULT_GRID_SIZE);
+createResetButton();
